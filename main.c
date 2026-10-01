@@ -27,7 +27,14 @@ int main() {
             printf("День: %d, %02d:00\n", current_day, current_hour);
             break;
         case 2:
-            printf("Время\n");
+            printf("Сколько часов прибавить?\n");
+            int add_h;
+            scanf("%d", &add_h);
+            current_hour += add_h;
+            if (current_hour >= 24) {
+                current_day += (current_hour / 24);
+                current_hour = current_hour % 24;
+            }            
             break;
         case 3:
             printf("Инвентарь\n");
