@@ -2,10 +2,14 @@
 #define INVENTORY_SIZE 10
 #define HOURS_IN_DAY 24
 #define START_HOUR 8
+const char* item_names[] = {
+    "Пусто", "Дерево", "Камень", "Семена",
+    "Железо", "Золото", "Алмаз", "Трава", "Вода", "Уголь"
+};
 int main() {
     int current_day = 1;
     int current_hour = START_HOUR;
-    int inventory[INVENTORY_SIZE] = { 1, 2, 3, 4, 1 };
+    int inventory[INVENTORY_SIZE] = { 1, 2, 3, 4, 1};
     int choice;
     do {
         printf("\n=== МЕНЮ ===\n");
@@ -37,7 +41,10 @@ int main() {
             }            
             break;
         case 3:
-            printf("Инвентарь\n");
+            printf("\n===Инвентарь===\n");
+            for (int i = 0; i < 10; i++) {
+                printf("Слот %d: [%d] (%s)\n", i, inventory[i], item_names[inventory[i]]);
+            }
             break;
         case 4:
             printf("Положить\n");
