@@ -23,7 +23,8 @@ int main() {
             printf("Выход\n");
             break;
         case 1:
-            printf("Часы\n");
+            printf("\n===Текущее время===\n");
+            printf("День: %d, %02d:00\n", current_day, current_hour);
             break;
         case 2:
             printf("Время\n");
