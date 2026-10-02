@@ -23,7 +23,10 @@ int main() {
         printf("[5] Выбросить предмет\n");
         printf("[6] Очистить от мусора\n");
         printf("Выбор: ");
-        scanf("%d", &choice);
+        while (scanf("%d", &choice) != 1) {
+            printf("Ошибка! Введите число: ");
+            while (getchar() != '\n');
+        }
         switch (choice) {
         case 0:
             printf("Выход\n");
@@ -35,7 +38,10 @@ int main() {
         case 2:
             printf("Сколько часов прибавить?\n");
             int add_h;
-            scanf("%d", &add_h);
+            while (scanf("%d", &add_h) != 1) {
+                printf("Ошибка! Введите число: ");
+                while (getchar() != '\n');
+            }
             current_hour += add_h;
             if (current_hour >= 24) {
                 current_day += (current_hour / 24);
@@ -50,19 +56,28 @@ int main() {
             break;
         case 4:
             printf("Куда положить?\n");
-            scanf("%d", &slot);
+            while (scanf("%d", &slot) != 1) {
+                printf("Ошибка! Введите число: ");
+                while (getchar() != '\n');
+            }
             if (slot<0 || slot >= INVENTORY_SIZE) {
                 printf("Нет такого слота\n");
                 break;
             }
             printf("Что положить?\n");
-            scanf("%d", &obj);
+            while (scanf("%d", &obj) != 1) {
+                printf("Ошибка! Введите число: ");
+                while (getchar() != '\n');
+            }
             inventory[slot] = obj;
             printf("Добавлено %s", item_names[inventory[slot]]);
             break;
         case 5:
             printf("Что выбросить?\n");
-            scanf("%d", &slot);
+            while (scanf("%d", &slot) != 1) {
+                printf("Ошибка! Введите число: ");
+                while (getchar() != '\n');
+            }
             if (slot < 0 || slot >= INVENTORY_SIZE) {
                 printf("Нет такого слота\n");
                 break;
@@ -71,7 +86,19 @@ int main() {
             printf("Слот очищен\n");
             break;
         case 6:
-            printf("Очистка\n");
+            printf("От какого предмета очистить инвентарь?\n");
+            while (scanf("%d", &obj) != 1) {
+                printf("Ошибка! Введите число: ");
+                while (getchar() != '\n');
+            }
+            int count_slot = 0;
+            for (int i = 0; i < INVENTORY_SIZE; i++) {
+                if (inventory[i] == obj) {
+                    inventory[i] = 0;
+                    count_slot++;
+                }
+            }
+            printf("Было очищено %d слотов от %s", count_slot, item_names[obj]);
             break;
         default:
             printf("Неверный ввод\n");
