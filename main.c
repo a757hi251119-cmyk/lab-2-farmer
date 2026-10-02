@@ -47,7 +47,17 @@ int main() {
             }
             break;
         case 4:
-            printf("Положить\n");
+            printf("Куда положить?\n");
+            int slot;
+            scanf("%d", &slot);
+            if (slot<0 || slot >= INVENTORY_SIZE) {
+                printf("Нет такого слота\n");
+                break;
+            }
+            printf("Что положить?\n");
+            int obj;
+            scanf("%d", &obj);
+            inventory[slot] = obj;
             break;
         case 5:
             printf("Выбросить\n");
