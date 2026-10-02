@@ -11,6 +11,8 @@ int main() {
     int current_hour = START_HOUR;
     int inventory[INVENTORY_SIZE] = { 1, 2, 3, 4, 1};
     int choice;
+    int slot;
+    int obj;
     do {
         printf("\n=== МЕНЮ ===\n");
         printf("[0] Выход\n");
@@ -48,19 +50,25 @@ int main() {
             break;
         case 4:
             printf("Куда положить?\n");
-            int slot;
             scanf("%d", &slot);
             if (slot<0 || slot >= INVENTORY_SIZE) {
                 printf("Нет такого слота\n");
                 break;
             }
             printf("Что положить?\n");
-            int obj;
             scanf("%d", &obj);
             inventory[slot] = obj;
+            printf("Добавлено %s", item_names[inventory[slot]]);
             break;
         case 5:
-            printf("Выбросить\n");
+            printf("Что выбросить?\n");
+            scanf("%d", &slot);
+            if (slot < 0 || slot >= INVENTORY_SIZE) {
+                printf("Нет такого слота\n");
+                break;
+            }
+            inventory[slot] = 0;
+            printf("Слот очищен\n");
             break;
         case 6:
             printf("Очистка\n");
