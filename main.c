@@ -18,8 +18,8 @@ int durak(char message[]) {
 void load_items(char item_names[][MAX_NAME_LEN]) {
     FILE* file = fopen("items.txt", "r");
     char default_names[10][32] =
-    { "Пусто", "Дерево", "Камень", "Семена", "Железо",
-        "Золото", "Алмаз", "Трава", "Вода", "Уголь" };
+    { "Empty", "Tree", "Stone", "Seeds", "Iron",
+      "Gold", "Diamond", "Grass", "Water", "Coal" };
     if (file == NULL) {
         printf("Ошибка: не удалось открыть файл!\n");
         for (int i = 0; i < 10; i++) {
@@ -29,7 +29,7 @@ void load_items(char item_names[][MAX_NAME_LEN]) {
     else {
         for (int i = 0; i < MAX_ITEMS; i++) {
             fgets(item_names[i], MAX_NAME_LEN, file);
-            item_names[i][strcspn(item_names[i], "\n")] = '\0';
+            item_names[i][strcspn(item_names[i], "\n")] = '\0';            
         }
         fclose(file);
     }
@@ -83,6 +83,35 @@ void delate_all_items(int inventory[], char item_names[][MAX_NAME_LEN]) {
     }
     printf("Было очищено %d слотов от %s", count_slot, item_names[obj]);
 }
+void find_item(int inventory[], char item_names[][MAX_NAME_LEN]) {
+    char search_name[32];
+    printf("Какой предмет хотите найти?\n");
+    scanf("%31s", search_name);
+    int found_id = -1;
+    for (int i = 0; i < INVENTORY_SIZE; i++) {
+        if (strcmp(item_names[i], search_name) == 0) {
+            found_id = i;
+            break;
+        }
+    }
+
+    if (found_id == -1) {
+        printf("Предмет не найден в каталоге\n");
+        return;
+    }
+
+    int found_in_inv = 0;
+    for (int i = 0; i < INVENTORY_SIZE; i++) {
+        if (inventory[i] == found_id) {
+            printf("Найден в слоте %d\n", i);
+            found_in_inv = 1;
+        }
+    }
+
+    if (found_in_inv == 0) {
+        printf("В рюкзаке нет этого предмета\n");
+    }
+}
 int main() {
     int current_day = 1;
     int current_hour = START_HOUR;
@@ -106,6 +135,7 @@ int main() {
         printf("[4] Положить предмет в слот\n");
         printf("[5] Выбросить предмет\n");
         printf("[6] Очистить от мусора\n");
+        printf("[7] Найти предмет\n");
         printf("Выбор: ");
         while (scanf("%d", &choice) != 1) {
             printf("Ошибка! Введите число: ");
@@ -132,6 +162,9 @@ int main() {
             break;
         case 6:
             delate_all_items(inventory, item_names);
+            break;
+        case 7:
+            find_item(inventory, item_names);
             break;
         default:
             printf("Неверный ввод\n");
