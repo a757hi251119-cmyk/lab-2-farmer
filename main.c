@@ -112,6 +112,25 @@ void find_item(int inventory[], char item_names[][MAX_NAME_LEN]) {
         printf("В рюкзаке нет этого предмета\n");
     }
 }
+void write_diary(int current_day, int current_hour, int inventory[], char item_names[][MAX_NAME_LEN], char farmer_name[]) {
+    FILE* file = fopen("diary.txt", "a");
+    if (file == NULL) {
+        printf("Ошибка: не удалось открыть файл!\n");
+        return;
+    }
+    fprintf(file, "=== День %d, Час %d ===\n", current_day, current_hour);
+    fprintf(file, "Фермер: %s\n", farmer_name);
+    fprintf(file, "Инвентарь:\n");
+    for (int i = 0; i < INVENTORY_SIZE; i++) {
+        if (inventory[i] != 0) {
+            fprintf(file, "Слот %d: %s\n", i, item_names[inventory[i]]);
+        }
+    }
+    fclose(file);
+    printf("Дневник обновлён\n");
+
+}
+
 int main() {
     int current_day = 1;
     int current_hour = START_HOUR;
@@ -136,6 +155,7 @@ int main() {
         printf("[5] Выбросить предмет\n");
         printf("[6] Очистить от мусора\n");
         printf("[7] Найти предмет\n");
+        printf("[8] Записать в дневник\n");
         printf("Выбор: ");
         while (scanf("%d", &choice) != 1) {
             printf("Ошибка! Введите число: ");
@@ -165,6 +185,9 @@ int main() {
             break;
         case 7:
             find_item(inventory, item_names);
+            break;
+        case 8:
+            write_diary(current_day, current_hour, inventory, item_names, farmer_name);
             break;
         default:
             printf("Неверный ввод\n");
