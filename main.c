@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #define INVENTORY_SIZE 10
 #define MAX_ITEMS 10
 #define MAX_NAME_LEN 32
@@ -15,6 +16,7 @@ int durak(char message[]) {
     }
     return x;
 }
+
 void load_items(char item_names[][MAX_NAME_LEN]) {
     FILE* file = fopen("items.txt", "r");
     char default_names[10][32] =
@@ -130,7 +132,39 @@ void write_diary(int current_day, int current_hour, int inventory[], char item_n
     printf("Дневник обновлён\n");
 
 }
-
+void process_logs() {
+    FILE* inp = fopen("input.txt", "r");
+    FILE* out = fopen("outputt.txt", "w");
+    if (inp == NULL || out == NULL) { 
+        printf("Ошибка: не удалось открыть файл!\n");
+        return;
+    }
+    int count_info = 0;
+    int count_warn = 0;
+    int count_error = 0;
+    int line_num = 1;
+    char buffer[256];
+    while (fgets(buffer, 256, inp) != NULL) {
+        if (strncmp(buffer, "[INFO]", 6) == 0) {
+            count_info++;
+        }
+        if (strncmp(buffer, "[WARN]", 6) == 0) {
+            count_warn++;
+            fprintf(out, "Строка %d: %s\n", line_num, buffer + 7);
+        }
+        if (strncmp(buffer, "[ERROR]", 7) == 0) {
+            count_error++;
+            fprintf(out, "Строка %d: %s\n", line_num, buffer + 8);
+        }
+        line_num++;
+    }
+    fprintf(out, "INFO: %d\n", count_info);
+    fprintf(out, "WARN: %d\n", count_warn);
+    fprintf(out, "ERROR: %d", count_error);
+    printf("INFO: %d | WARN: %d | ERROR: %d", count_info, count_warn, count_error);
+    fclose(inp);
+    fclose(out);
+}
 int main() {
     int current_day = 1;
     int current_hour = START_HOUR;
@@ -156,6 +190,7 @@ int main() {
         printf("[6] Очистить от мусора\n");
         printf("[7] Найти предмет\n");
         printf("[8] Записать в дневник\n");
+        printf("[9] Анализатор логов\n");
         printf("Выбор: ");
         while (scanf("%d", &choice) != 1) {
             printf("Ошибка! Введите число: ");
@@ -188,6 +223,9 @@ int main() {
             break;
         case 8:
             write_diary(current_day, current_hour, inventory, item_names, farmer_name);
+            break;
+        case 9:
+            process_logs();
             break;
         default:
             printf("Неверный ввод\n");
