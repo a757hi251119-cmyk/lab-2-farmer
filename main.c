@@ -185,13 +185,35 @@ char** generate_map(int *height, int *width) {
     }
     for (int i = 0; i < *height; i++) {
         for (int j = 0; j < *width; j++) {
-            map[i][j] = EMPTY;
+            if (i && 0 < i < *height - 1 && j && 0 < j < *width - 1) {
+                if (rand() % 100 < 20) {
+                    if (rand() % 2 == 0) {
+                        map[i][j] = ROCK;
+                    }
+                    else {
+                        map[i][j] = TREE;
+                    }
+                }
+                else {
+                    map[i][j] = EMPTY;
+                }
+            }
+            else {
+                map[i][j] = EMPTY;
+            }
         }
     }
     return map;
 }
 
-
+void print_map(char** map, int height, int width) {
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            printf("%c", map[i][j]);
+        }
+    printf("\n");
+    }
+}
 
 
 int main() {
@@ -220,6 +242,7 @@ int main() {
         printf("[7] Найти предмет\n");
         printf("[8] Записать в дневник\n");
         printf("[9] Анализатор логов\n");
+        printf("[10] Навстречу приключениям!\n");
         printf("Выбор: ");
         while (scanf("%d", &choice) != 1) {
             printf("Ошибка! Введите число: ");
@@ -256,9 +279,22 @@ int main() {
         case 9:
             process_logs();
             break;
+        case 10:
+            int height, width;
+            char** map = generate_map(&height, &width);
+            if (map == NULL){ 
+                printf("Ошибка памяти\n");
+                break;
+            }
+            print_map(map, height, width);
+            for (int i = 0; i < height; i++) {
+                free(map[i]);
+            }
+            break;
         default:
             printf("Неверный ввод\n");
         }
-    } while (choice != 0);
+    } 
+    while (choice != 0);
     return 0;
 }
