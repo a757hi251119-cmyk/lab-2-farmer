@@ -1,11 +1,21 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #define INVENTORY_SIZE 10
 #define MAX_ITEMS 10
 #define MAX_NAME_LEN 32
 #define HOURS_IN_DAY 24
 #define START_HOUR 8
+#define MIN_MAP_SIZE 5
+#define MAX_MAP_SIZE 30
+#define WALL '#'
+#define EMPTY '.'
+#define HERO '@'
+#define TREE 'T'
+#define ROCK 'R'
+#define PORTAL 'P'
+
 char item_names[MAX_ITEMS][MAX_NAME_LEN];
 int durak(char message[]) {
     int x;
@@ -165,6 +175,25 @@ void process_logs() {
     fclose(inp);
     fclose(out);
 }
+
+char** generate_map(int *height, int *width) {
+    *height = rand() % (MAX_MAP_SIZE - MIN_MAP_SIZE + 1) + MIN_MAP_SIZE;
+    *width = rand() % (MAX_MAP_SIZE - MIN_MAP_SIZE + 1) + MIN_MAP_SIZE;
+    char **map = (char**)malloc(*height * sizeof(char*));
+    for (int i = 0; i < *height; i++) {
+        map[i] = (char*)malloc(*width * sizeof(char));
+    }
+    for (int i = 0; i < *height; i++) {
+        for (int j = 0; j < *width; j++) {
+            map[i][j] = EMPTY;
+        }
+    }
+    return map;
+}
+
+
+
+
 int main() {
     int current_day = 1;
     int current_hour = START_HOUR;
