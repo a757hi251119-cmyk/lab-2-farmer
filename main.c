@@ -185,7 +185,7 @@ char** generate_map(int *height, int *width, int *hero_x, int *hero_y) {
     }
     for (int i = 0; i < *height; i++) {
         for (int j = 0; j < *width; j++) {
-            if (i && 0 < i < *height - 1 && j && 0 < j < *width - 1) {
+            if (i>0 && 0 < i < *height - 1 && j > 0 && 0 < j < *width - 1) {
                 if (rand() % 100 < 20) {
                     if (rand() % 2 == 0) {
                         map[i][j] = ROCK;
@@ -233,6 +233,7 @@ int main() {
     int obj;
     char item_names[10][32];
     char farmer_name[32];
+    srand(time(NULL));
     load_items(item_names);
     printf("Введите имя: ");
     fgets(farmer_name, 32, stdin);
@@ -290,13 +291,15 @@ int main() {
         case 10:
             int height, width;
             int hero_x, hero_y;
+            char move;
+            int new_y, new_x;
+            int wrap_count = 0;
+            int portal_spawned = 0;
             char** map = generate_map(&height, &width, &hero_x, &hero_y);
             if (map == NULL){ 
                 printf("Ошибка памяти\n");
                 break;
             }
-            char move;
-            int new_y, new_x;
             while (true) {
                 print_map(map, height, width);
                 printf("Куда идем? (W/A/S/D, Q - выход): ");
@@ -320,23 +323,49 @@ int main() {
                     new_x = hero_x +1;
                     new_y = hero_y;
                 }
-                if (new_x >= 0 && new_x < width && new_y >= 0 && new_y < height) {
-                    if (map[new_y][new_x] == TREE || map[new_y][new_x] == ROCK) {
-                        printf("Туда нельзя!\n");
-                        map[hero_y][hero_x] = HERO;
-                    }
-                    else {
-                        map[hero_y][hero_x] = EMPTY;
-                        hero_x = new_x;
-                        hero_y = new_y;
-                        map[hero_y][hero_x] = HERO;
+                if (new_x >= width || new_y >= height || new_y < 0 || new_x < 0) {
+                    wrap_count++;
+                }
+                new_x = (new_x + width) % width;
+                new_y = (new_y + height) % height;
+                if (wrap_count >= 3 && portal_spawned == 0) {
+                    while (true) {
+                        int px = rand() % width;
+                        int py = rand() % height;
+                        if (map[py][px] == EMPTY && px != hero_x && py != hero_y) {
+                            map[py][px] = PORTAL;
+                            portal_spawned = 1;
+                            printf("DEBUG: проверка карты в точке: %c\n", map[py][px]);
+                            break;
+                        }
                     }
                 }
-            }   
-            print_map(map, height, width);
+                if (map[new_y][new_x] == TREE || map[new_y][new_x] == ROCK) {
+                     printf("Туда нельзя!\n");
+                     map[hero_y][hero_x] = HERO;
+                }
+                else if (map[new_y][new_x] == PORTAL) {
+                    for (int i = 0; i < height; i++) {
+                        free(map[i]);
+                    }
+                    free(map);
+                    map = generate_map(&height, &width, &hero_x, &hero_y);
+                    wrap_count = 0;
+                    portal_spawned = 0;
+                    continue;
+                }
+                else {
+                     map[hero_y][hero_x] = EMPTY;
+                     hero_x = new_x;
+                     hero_y = new_y;
+                     map[hero_y][hero_x] = HERO;
+                }
+            }
+         
             for (int i = 0; i < height; i++) {
                 free(map[i]);
             }
+            free(map);
             break;
         default:
             printf("Неверный ввод\n");
