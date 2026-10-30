@@ -176,7 +176,7 @@ void process_logs() {
     fclose(out);
 }
 
-char** generate_map(int *height, int *width) {
+char** generate_map(int *height, int *width, int *hero_x, int *hero_y) {
     *height = rand() % (MAX_MAP_SIZE - MIN_MAP_SIZE + 1) + MIN_MAP_SIZE;
     *width = rand() % (MAX_MAP_SIZE - MIN_MAP_SIZE + 1) + MIN_MAP_SIZE;
     char **map = (char**)malloc(*height * sizeof(char*));
@@ -201,6 +201,14 @@ char** generate_map(int *height, int *width) {
             else {
                 map[i][j] = EMPTY;
             }
+        }
+    }
+    while (true) {
+        *hero_x = rand() % *width;
+        *hero_y = rand() % *height;
+        if (map[*hero_y][*hero_x] == EMPTY) {
+            map[*hero_y][*hero_x] = HERO;
+            break;
         }
     }
     return map;
@@ -281,7 +289,8 @@ int main() {
             break;
         case 10:
             int height, width;
-            char** map = generate_map(&height, &width);
+            int hero_x, hero_y;
+            char** map = generate_map(&height, &width, &hero_x, &hero_y);
             if (map == NULL){ 
                 printf("Ошибка памяти\n");
                 break;
