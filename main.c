@@ -295,6 +295,44 @@ int main() {
                 printf("Ошибка памяти\n");
                 break;
             }
+            char move;
+            int new_y, new_x;
+            while (true) {
+                print_map(map, height, width);
+                printf("Куда идем? (W/A/S/D, Q - выход): ");
+                scanf(" %c", &move);
+                if (move == 'Q') {
+                    break;
+                }
+                if (move == 'W') {
+                    new_x = hero_x;
+                    new_y = hero_y -1;
+                }
+                if (move == 'A') {
+                    new_x = hero_x -1;
+                    new_y = hero_y;
+                }
+                if (move == 'S') {
+                    new_x = hero_x;
+                    new_y = hero_y + 1;
+                }
+                if (move == 'D') {
+                    new_x = hero_x +1;
+                    new_y = hero_y;
+                }
+                if (new_x >= 0 && new_x < width && new_y >= 0 && new_y < height) {
+                    if (map[new_y][new_x] == TREE || map[new_y][new_x] == ROCK) {
+                        printf("Туда нельзя!\n");
+                        map[hero_y][hero_x] = HERO;
+                    }
+                    else {
+                        map[hero_y][hero_x] = EMPTY;
+                        hero_x = new_x;
+                        hero_y = new_y;
+                        map[hero_y][hero_x] = HERO;
+                    }
+                }
+            }   
             print_map(map, height, width);
             for (int i = 0; i < height; i++) {
                 free(map[i]);
