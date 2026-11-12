@@ -8,6 +8,8 @@ struct Player {
 	int stamina, max_stamina;
 	int gold;
 	int x, y;
+	int inventory[INVENTORY_SIZE];
 };
-
+void create_player(struct Player** p);
+void show_player_card(struct Player *p);
 #endif 

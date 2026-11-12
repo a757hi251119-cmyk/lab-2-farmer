@@ -1,3 +1,4 @@
+#include "player.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -231,8 +232,6 @@ int main() {
     char item_names[10][32];
     srand(time(NULL));
     load_items(item_names);
-    farmer_name[strcspn(farmer_name, "\n")] = '\0';
-
     do {
         printf("\n=== Супер весёлый фермер ===\n");
         printf("[0] Выход\n");
@@ -258,33 +257,39 @@ int main() {
             printf("Выход\n");
             break;
         case 1:
-            show_time(current_day, current_hour);
+            create_player(&pl);
             break;
         case 2:
-            change_time(&current_day, &current_hour);
+            show_player_card(pl);
             break;
         case 3:
-            show_inventory(inventory, item_names);
+            //show_time(current_day, current_hour);
             break;
         case 4:
-            put_item(inventory, item_names);
+            //change_time(&current_day, &current_hour);
             break;
         case 5:
-            delete_item(inventory);            
+            //show_inventory(inventory, item_names);
             break;
         case 6:
-            delate_all_items(inventory, item_names);
+            //put_item(inventory, item_names);
             break;
         case 7:
-            find_item(inventory, item_names);
+            //delete_item(inventory);            
             break;
         case 8:
-            write_diary(current_day, current_hour, inventory, item_names, farmer_name);
+            //delate_all_items(inventory, item_names);
             break;
         case 9:
-            process_logs();
+            //find_item(inventory, item_names);
             break;
         case 10:
+            //write_diary(current_day, current_hour, inventory, item_names, farmer_name);
+            break;
+        case 11:
+            process_logs();
+            break;
+        case 12:
             int height, width;
             int hero_x, hero_y;
             char move;
