@@ -1,4 +1,5 @@
 #include "player.h"
+#include "utils.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,15 +19,6 @@
 #define PORTAL 'P'
 
 char item_names[MAX_ITEMS][MAX_NAME_LEN];
-int durak(char message[]) {
-    int x;
-    printf("%s", message);
-    while (scanf("%d", &x) != 1) {
-        printf("Ошибка! Введите число: ");
-        while (getchar() != '\n');
-    }
-    return x;
-}
 
 void load_items(char item_names[][MAX_NAME_LEN]) {
     FILE* file = fopen("items.txt", "r");
@@ -48,43 +40,8 @@ void load_items(char item_names[][MAX_NAME_LEN]) {
     }
 
 }
-void show_time(int day, int hour) {
-    printf("\n===Текущее время===\n");
-    printf("День: %d, %02d:00\n", day, hour);
-}
-void change_time(int* day, int* hour) {
-    int add_h = durak("Сколько часов прибавить?\n");
-    *hour += add_h;
-    if (*hour >= 24) {
-        *day += (*hour / 24);
-        *hour = *hour % 24;
-    }
-}
-void show_inventory(int inventory[], char item_names[][MAX_NAME_LEN]) {
-    printf("\n===Инвентарь===\n");
-    for (int i = 0; i < INVENTORY_SIZE; i++) {
-        printf("Слот %d: [%d] - %s\n", i, inventory[i], item_names[inventory[i]]);
-    }
-}
-void put_item(int inventory[],  char item_names[][MAX_NAME_LEN]) {
-    int slot = durak("Куда положить?\n");
-    if (slot < 0 || slot >= INVENTORY_SIZE) {
-        printf("Нет такого слота\n");
-        return;
-    }
-    int obj = durak("Что положить\n");
-    inventory[slot] = obj;
-    printf("Добавлено %s", item_names[inventory[slot]]);
-}
-void delete_item(int inventory[]) {
-    int slot = durak("Что выбросить?\n");
-    if (slot < 0 || slot >= INVENTORY_SIZE) {
-        printf("Нет такого слота\n");
-        return;
-    }
-    inventory[slot] = 0;
-    printf("Слот очищен\n");
-}
+
+
 void delate_all_items(int inventory[], char item_names[][MAX_NAME_LEN]) {
     int obj = durak("От какого предмета очистить инвентарь?\n");
     int count_slot = 0;
@@ -228,6 +185,7 @@ void print_map(char** map, int height, int width) {
 int main() {
     struct Player* pl = NULL;
     struct Map* map = NULL;
+    struct World world = { 1, START_HOUR };
     int choice;
     char item_names[10][32];
     srand(time(NULL));
@@ -263,19 +221,19 @@ int main() {
             show_player_card(pl);
             break;
         case 3:
-            //show_time(current_day, current_hour);
+            show_time(&world);
             break;
         case 4:
-            //change_time(&current_day, &current_hour);
+            change_time(&world);
             break;
         case 5:
-            //show_inventory(inventory, item_names);
+            show_inventory(pl, item_names);
             break;
         case 6:
-            //put_item(inventory, item_names);
+            put_item(pl, item_names);
             break;
         case 7:
-            //delete_item(inventory);            
+            delete_item(pl, item_names);            
             break;
         case 8:
             //delate_all_items(inventory, item_names);
