@@ -225,33 +225,29 @@ void print_map(char** map, int height, int width) {
 
 
 int main() {
-    int current_day = 1;
-    int current_hour = START_HOUR;
-    int inventory[INVENTORY_SIZE] = { 1, 2, 3, 4, 1};
+    struct Player* pl = NULL;
+    struct Map* map = NULL;
     int choice;
-    int slot;
-    int obj;
     char item_names[10][32];
-    char farmer_name[32];
     srand(time(NULL));
     load_items(item_names);
-    printf("Введите имя: ");
-    fgets(farmer_name, 32, stdin);
     farmer_name[strcspn(farmer_name, "\n")] = '\0';
 
     do {
-        printf("\n=== Фермер %s ===\n", farmer_name);
+        printf("\n=== Супер весёлый фермер ===\n");
         printf("[0] Выход\n");
-        printf("[1] Посмотреть на часы\n");
-        printf("[2] Промотать время\n");
-        printf("[3] Посмотреть инвентарь\n");
-        printf("[4] Положить предмет в слот\n");
-        printf("[5] Выбросить предмет\n");
-        printf("[6] Очистить от мусора\n");
-        printf("[7] Найти предмет\n");
-        printf("[8] Записать в дневник\n");
-        printf("[9] Анализатор логов\n");
-        printf("[10] Навстречу приключениям!\n");
+        printf("[1] Создать / пересоздать персонажа\n");
+        printf("[2] Карточка персонажа\n");
+        printf("[3] Посмотреть на часы\n");
+        printf("[4] Промотать время\n");
+        printf("[5] Посмотреть инвентарь\n");
+        printf("[6] Положить предмет в слот\n");
+        printf("[7] Выбросить предмет\n");
+        printf("[8] Очистить от мусора\n");
+        printf("[9] Найти предмет\n");
+        printf("[10] Записать в дневник\n");
+        printf("[11] Анализатор логов\n");
+        printf("[12] Навстречу приключениям!\n");
         printf("Выбор: ");
         while (scanf("%d", &choice) != 1) {
             printf("Ошибка! Введите число: ");
