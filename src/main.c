@@ -41,65 +41,6 @@ void load_items(char item_names[][MAX_NAME_LEN]) {
 
 }
 
-
-void delate_all_items(int inventory[], char item_names[][MAX_NAME_LEN]) {
-    int obj = durak("От какого предмета очистить инвентарь?\n");
-    int count_slot = 0;
-    for (int i = 0; i < INVENTORY_SIZE; i++) {
-        if (inventory[i] == obj) {
-            inventory[i] = 0;
-            count_slot++;
-        }
-    }
-    printf("Было очищено %d слотов от %s", count_slot, item_names[obj]);
-}
-void find_item(int inventory[], char item_names[][MAX_NAME_LEN]) {
-    char search_name[32];
-    printf("Какой предмет хотите найти?\n");
-    scanf("%31s", search_name);
-    int found_id = -1;
-    for (int i = 0; i < INVENTORY_SIZE; i++) {
-        if (strcmp(item_names[i], search_name) == 0) {
-            found_id = i;
-            break;
-        }
-    }
-
-    if (found_id == -1) {
-        printf("Предмет не найден в каталоге\n");
-        return;
-    }
-
-    int found_in_inv = 0;
-    for (int i = 0; i < INVENTORY_SIZE; i++) {
-        if (inventory[i] == found_id) {
-            printf("Найден в слоте %d\n", i);
-            found_in_inv = 1;
-        }
-    }
-
-    if (found_in_inv == 0) {
-        printf("В рюкзаке нет этого предмета\n");
-    }
-}
-void write_diary(int current_day, int current_hour, int inventory[], char item_names[][MAX_NAME_LEN], char farmer_name[]) {
-    FILE* file = fopen("diary.txt", "a");
-    if (file == NULL) {
-        printf("Ошибка: не удалось открыть файл!\n");
-        return;
-    }
-    fprintf(file, "=== День %d, Час %d ===\n", current_day, current_hour);
-    fprintf(file, "Фермер: %s\n", farmer_name);
-    fprintf(file, "Инвентарь:\n");
-    for (int i = 0; i < INVENTORY_SIZE; i++) {
-        if (inventory[i] != 0) {
-            fprintf(file, "Слот %d: %s\n", i, item_names[inventory[i]]);
-        }
-    }
-    fclose(file);
-    printf("Дневник обновлён\n");
-
-}
 void process_logs() {
     FILE* inp = fopen("input.txt", "r");
     FILE* out = fopen("outputt.txt", "w");
@@ -236,13 +177,13 @@ int main() {
             delete_item(pl, item_names);            
             break;
         case 8:
-            //delate_all_items(inventory, item_names);
+            delate_all_items(pl, item_names);
             break;
         case 9:
-            //find_item(inventory, item_names);
+            find_item(pl, item_names);
             break;
         case 10:
-            //write_diary(current_day, current_hour, inventory, item_names, farmer_name);
+            write_diary(&world, pl, item_names);
             break;
         case 11:
             process_logs();

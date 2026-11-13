@@ -81,3 +81,64 @@ void delete_item(struct Player *p, char item_names[][MAX_NAME_LEN]) {
     p->inventory[slot] = 0;
     printf("Слот очищен\n");
 }
+void delate_all_items(struct Player* p, char item_names[][MAX_NAME_LEN]) {
+    if (!check_player(p)) return;
+    int obj = durak("От какого предмета очистить инвентарь?\n");
+    int count_slot = 0;
+    for (int i = 0; i < INVENTORY_SIZE; i++) {
+        if (p->inventory[i] == obj) {
+            p->inventory[i] = 0;
+            count_slot++;
+        }
+    }
+    printf("Было очищено %d слотов от %s", count_slot, item_names[obj]);
+}
+void find_item(struct Player *p, char item_names[][MAX_NAME_LEN]) {
+    if (!check_player(p)) return;
+    char search_name[32];
+    printf("Какой предмет хотите найти?\n");
+    scanf("%31s", search_name);
+    int found_id = -1;
+    for (int i = 0; i < INVENTORY_SIZE; i++) {
+        if (strcmp(item_names[i], search_name) == 0) {
+            found_id = i;
+            break;
+        }
+    }
+
+    if (found_id == -1) {
+        printf("Предмет не найден в каталоге\n");
+        return;
+    }
+
+    int found_in_inv = 0;
+    for (int i = 0; i < INVENTORY_SIZE; i++) {
+        if (p->inventory[i] == found_id) {
+            printf("Найден в слоте %d\n", i);
+            found_in_inv = 1;
+        }
+    }
+
+    if (found_in_inv == 0) {
+        printf("В рюкзаке нет этого предмета\n");
+    }
+}
+void write_diary(struct World *w, struct Player *p, char item_names[][MAX_NAME_LEN]) {
+    if (!check_player(p)) return;
+    FILE* file = fopen("diary.txt", "a");
+    if (file == NULL) {
+        printf("Ошибка: не удалось открыть файл!\n");
+        return;
+    }
+    fprintf(file, "=== День %d, Час %d ===\n", w->day, w->hour);
+    fprintf(file, "Фермер: %s\n", p->name);
+    fprintf(file, "Инвентарь:\n");
+    for (int i = 0; i < INVENTORY_SIZE; i++) {
+        if (p->inventory[i] != 0) {
+            fprintf(file, "Слот %d: %s\n", i, item_names[p->inventory[i]]);
+        }
+    }
+    fclose(file);
+    printf("Дневник обновлён\n");
+
+}
