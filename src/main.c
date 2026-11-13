@@ -5,85 +5,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define INVENTORY_SIZE 10
-#define MAX_ITEMS 10
-#define MAX_NAME_LEN 32
-#define HOURS_IN_DAY 24
-#define START_HOUR 8
-#define MIN_MAP_SIZE 5
-#define MAX_MAP_SIZE 30
-#define WALL '#'
-#define EMPTY '.'
-#define HERO '@'
-#define TREE 'T'
-#define ROCK 'R'
-#define PORTAL 'P'
-
-char item_names[MAX_ITEMS][MAX_NAME_LEN];
-
-void load_items(char item_names[][MAX_NAME_LEN]) {
-    FILE* file = fopen("items.txt", "r");
-    char default_names[10][32] =
-    { "Empty", "Tree", "Stone", "Seeds", "Iron",
-      "Gold", "Diamond", "Grass", "Water", "Coal" };
-    if (file == NULL) {
-        printf("Ошибка: не удалось открыть файл!\n");
-        for (int i = 0; i < 10; i++) {
-            strcpy(item_names[i], default_names[i]);
-        }
-    }
-    else {
-        for (int i = 0; i < MAX_ITEMS; i++) {
-            fgets(item_names[i], MAX_NAME_LEN, file);
-            item_names[i][strcspn(item_names[i], "\n")] = '\0';            
-        }
-        fclose(file);
-    }
-
-}
-
-void process_logs() {
-    FILE* inp = fopen("input.txt", "r");
-    FILE* out = fopen("outputt.txt", "w");
-    if (inp == NULL || out == NULL) { 
-        printf("Ошибка: не удалось открыть файл!\n");
-        return;
-    }
-    int count_info = 0;
-    int count_warn = 0;
-    int count_error = 0;
-    int line_num = 1;
-    char buffer[256];
-    while (fgets(buffer, 256, inp) != NULL) {
-        if (strncmp(buffer, "[INFO]", 6) == 0) {
-            count_info++;
-        }
-        if (strncmp(buffer, "[WARN]", 6) == 0) {
-            count_warn++;
-            fprintf(out, "Строка %d: %s\n", line_num, buffer + 7);
-        }
-        if (strncmp(buffer, "[ERROR]", 7) == 0) {
-            count_error++;
-            fprintf(out, "Строка %d: %s\n", line_num, buffer + 8);
-        }
-        line_num++;
-    }
-    fprintf(out, "INFO: %d\n", count_info);
-    fprintf(out, "WARN: %d\n", count_warn);
-    fprintf(out, "ERROR: %d", count_error);
-    printf("INFO: %d | WARN: %d | ERROR: %d", count_info, count_warn, count_error);
-    fclose(inp);
-    fclose(out);
-}
-
-
 
 int main() {
     struct Player* pl = NULL;
     struct Map* m = NULL;
     struct World world = { 1, START_HOUR };
+    char item_names[MAX_ITEMS][MAX_NAME_LEN];
     int choice;
-    char item_names[10][32];
     srand(time(NULL));
     load_items(item_names);
     do {
@@ -158,12 +86,18 @@ int main() {
             int new_x, new_y;
 
             while (true) {
-                printf("HP: %d/%d | Стамина: %d/%d | Золото: %d | Этаж: %d | Время: %02d:00\n",
-                    pl->hp, pl->max_hp, pl->stamina, pl->max_stamina, pl->gold, map.floor, world.hour);
+                const char* relic_name = "Нет";
+                if (pl->active_relic == 1) relic_name = "Кольцо жадности";
+                if (pl->active_relic == 2) relic_name = "Сапоги-скороходы";
+                if (pl->active_relic == 3) relic_name = "Камень тролля";
+
+                printf("HP: %d/%d | Стамина: %d/%d | Золото: %d | Этаж: %d | Время: %02d:00 | Амулет: %s\n",
+                    pl->hp, pl->max_hp, pl->stamina, pl->max_stamina, pl->gold, map.floor, world.hour, relic_name);
                 print_map(&map);
                 printf("Куда идём? (W/A/S/D, Q - выход): ");
                 scanf(" %c", &move);
                 if (move == 'Q') {
+                    free_map(&map);
                     break;
                 }
                 if (move == 'W') {
@@ -204,18 +138,32 @@ int main() {
                     map.map[pl->y][pl->x] = HERO;
                 }
                 else if (map.map[new_y][new_x] == PORTAL) {
-                    for (int i = 0; i < map.height; i++) {
-                        free(map.map[i]);
-                    }
-                    free(map.map);
+                    free_map(&map);
                     map.floor++;
-                    pl->gold += 10 * map.floor;
+                    int gold_reward = 10 * map.floor;
+                    if (pl->active_relic == 1) gold_reward *= 2; // Кольцо жадности
+                    pl->gold += gold_reward;
                     world.hour += 1; 
                     if (world.hour >= 24) {
                         world.day++;
                         world.hour %= 24;
                     }
-                    pl->stamina -= 5;
+
+                    int stamina_cost_floor = 5;
+                    if (pl->active_relic == 2) stamina_cost_floor = 1; // Сапоги-скороходы
+                    pl->stamina -= stamina_cost_floor;
+
+                    if (rand() % 100 < 20) { 
+                        int new_relic = rand() % 3 + 1;
+                        printf("Вы нашли реликвию! Надеть (1) или продать за 25 золота (2)? ");
+                        int choice = durak("");
+                        if (choice == 1) {
+                            pl->active_relic = new_relic;
+                        }
+                        else {
+                            pl->gold += 25;
+                        }
+                    }
 
                     generate_map(&map, pl);
                     wrap_count = 0;
@@ -228,10 +176,19 @@ int main() {
                     pl->y = new_y;
                     map.map[pl->y][pl->x] = HERO;
                 }
-                pl->stamina -= 1;
+
+                int stamina_cost = 1;
+                if (pl->active_relic == 1) stamina_cost = 2; // Кольцо жадности
+                pl->stamina -= stamina_cost;
+
+                if (pl->active_relic == 3) { // Камень тролля
+                    pl->hp += 1;
+                    if (pl->hp > pl->max_hp) pl->hp = pl->max_hp;
+                }
                 if (pl->stamina <= 0 || (world.hour >= 2 && world.hour < 8)) {
                     printf("Вы пали без сил! Эвакуация...\n");
                     pl->gold /= 2;
+                    free_map(&map);
                     break;
                 }
             }
@@ -242,6 +199,11 @@ int main() {
         }
     }
         while (choice != 0);
+        if (pl != NULL) {
+            printf("Память структуры по адресу %p освобождена\n", (void*)pl);
+            free(pl);
+            pl = NULL;
+        }
         return 0;
 }
     

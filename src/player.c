@@ -14,6 +14,7 @@ void create_player(struct Player** p) {
             return;
         }
         else {
+            printf("Память структуры по адресу %p освобождена\n", (void*)*p);
             free(*p);
             *p = NULL;
         }
@@ -26,6 +27,7 @@ void create_player(struct Player** p) {
     while (getchar() != '\n');
     printf("Введите имя: ");
     fgets((*p)->name, 32, stdin);
+    (*p)->active_relic = 0;
     (*p)->name[strcspn((*p)->name, "\n")] = '\0';
     (*p)->hp = 100;
     (*p)->max_hp = 100;

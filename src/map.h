@@ -19,4 +19,5 @@ struct Map {
 };
 void generate_map(struct Map* m, struct Player* p);
 void print_map(struct Map* m);
+void free_map(struct Map* m);
 #endif

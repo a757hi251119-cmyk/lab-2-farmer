@@ -13,7 +13,10 @@ struct Player {
 	int gold;
 	int x, y;
 	int inventory[INVENTORY_SIZE];
+	int active_relic; // 0 - нет, 1 - кольцо Жадности, 2 - сапоги-скороходы, 3 - камень тролля
+
 };
+
 void create_player(struct Player** p);
 void show_player_card(struct Player *p);
 void show_inventory(struct Player* p, char item_names[][MAX_NAME_LEN]);

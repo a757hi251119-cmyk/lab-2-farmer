@@ -51,3 +51,12 @@ void print_map(struct Map *m) {
         printf("\n");
     }
 }
+void free_map(struct Map* m) {
+    if (m->map != NULL) {
+        for (int i = 0; i < m->height; i++) {
+            free(m->map[i]);
+        }
+        free(m->map);
+        m->map = NULL;
+    }
+}
