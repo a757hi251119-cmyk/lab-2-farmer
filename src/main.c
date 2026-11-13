@@ -1,5 +1,6 @@
 #include "player.h"
 #include "utils.h"
+#include "map.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,57 +76,11 @@ void process_logs() {
     fclose(out);
 }
 
-char** generate_map(int *height, int *width, int *hero_x, int *hero_y) {
-    *height = rand() % (MAX_MAP_SIZE - MIN_MAP_SIZE + 1) + MIN_MAP_SIZE;
-    *width = rand() % (MAX_MAP_SIZE - MIN_MAP_SIZE + 1) + MIN_MAP_SIZE;
-    char **map = (char**)malloc(*height * sizeof(char*));
-    for (int i = 0; i < *height; i++) {
-        map[i] = (char*)malloc(*width * sizeof(char));
-    }
-    for (int i = 0; i < *height; i++) {
-        for (int j = 0; j < *width; j++) {
-            if (i>0 && 0 < i < *height - 1 && j > 0 && 0 < j < *width - 1) {
-                if (rand() % 100 < 20) {
-                    if (rand() % 2 == 0) {
-                        map[i][j] = ROCK;
-                    }
-                    else {
-                        map[i][j] = TREE;
-                    }
-                }
-                else {
-                    map[i][j] = EMPTY;
-                }
-            }
-            else {
-                map[i][j] = EMPTY;
-            }
-        }
-    }
-    while (true) {
-        *hero_x = rand() % *width;
-        *hero_y = rand() % *height;
-        if (map[*hero_y][*hero_x] == EMPTY) {
-            map[*hero_y][*hero_x] = HERO;
-            break;
-        }
-    }
-    return map;
-}
-
-void print_map(char** map, int height, int width) {
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            printf("%c", map[i][j]);
-        }
-    printf("\n");
-    }
-}
 
 
 int main() {
     struct Player* pl = NULL;
-    struct Map* map = NULL;
+    struct Map* m = NULL;
     struct World world = { 1, START_HOUR };
     int choice;
     char item_names[10][32];
@@ -174,7 +129,7 @@ int main() {
             put_item(pl, item_names);
             break;
         case 7:
-            delete_item(pl, item_names);            
+            delete_item(pl, item_names);
             break;
         case 8:
             delate_all_items(pl, item_names);
@@ -189,88 +144,104 @@ int main() {
             process_logs();
             break;
         case 12:
-            int height, width;
-            int hero_x, hero_y;
-            char move;
-            int new_y, new_x;
-            int wrap_count = 0;
-            int portal_spawned = 0;
-            char** map = generate_map(&height, &width, &hero_x, &hero_y);
-            if (map == NULL){ 
-                printf("Ошибка памяти\n");
+            if (pl == NULL) {
+                printf("Сначала создайте персонажа!\n");
                 break;
             }
+
+            struct Map map;
+            map.floor = 1;
+            generate_map(&map, pl);
+            char move;
+            int wrap_count = 0;
+            int portal_spawned = 0;
+            int new_x, new_y;
+
             while (true) {
-                print_map(map, height, width);
-                printf("Куда идем? (W/A/S/D, Q - выход): ");
+                printf("HP: %d/%d | Стамина: %d/%d | Золото: %d | Этаж: %d | Время: %02d:00\n",
+                    pl->hp, pl->max_hp, pl->stamina, pl->max_stamina, pl->gold, map.floor, world.hour);
+                print_map(&map);
+                printf("Куда идём? (W/A/S/D, Q - выход): ");
                 scanf(" %c", &move);
                 if (move == 'Q') {
                     break;
                 }
                 if (move == 'W') {
-                    new_x = hero_x;
-                    new_y = hero_y -1;
+                    new_x = pl->x;
+                    new_y = pl->y - 1;
                 }
                 if (move == 'A') {
-                    new_x = hero_x -1;
-                    new_y = hero_y;
+                    new_x = pl->x - 1;
+                    new_y = pl->y;
                 }
                 if (move == 'S') {
-                    new_x = hero_x;
-                    new_y = hero_y + 1;
+                    new_x = pl->x;
+                    new_y = pl->y + 1;
                 }
                 if (move == 'D') {
-                    new_x = hero_x +1;
-                    new_y = hero_y;
+                    new_x = pl->x + 1;
+                    new_y = pl->y;
                 }
-                if (new_x >= width || new_y >= height || new_y < 0 || new_x < 0) {
+                if (new_x >= map.width || new_y >= map.height || new_y < 0 || new_x < 0) {
                     wrap_count++;
                 }
-                new_x = (new_x + width) % width;
-                new_y = (new_y + height) % height;
+                new_x = (new_x + map.width) % map.width;
+                new_y = (new_y + map.height) % map.height;
+
                 if (wrap_count >= 3 && portal_spawned == 0) {
                     while (true) {
-                        int px = rand() % width;
-                        int py = rand() % height;
-                        if (map[py][px] == EMPTY && px != hero_x && py != hero_y) {
-                            map[py][px] = PORTAL;
+                        int px = rand() % map.width;
+                        int py = rand() % map.height;
+                        if (map.map[py][px] == EMPTY && px != pl->x && py != pl->y) {
+                            map.map[py][px] = PORTAL;
                             portal_spawned = 1;
-                            printf("DEBUG: проверка карты в точке: %c\n", map[py][px]);
                             break;
                         }
                     }
                 }
-                if (map[new_y][new_x] == TREE || map[new_y][new_x] == ROCK) {
-                     printf("Туда нельзя!\n");
-                     map[hero_y][hero_x] = HERO;
+                if (map.map[new_y][new_x] == TREE || map.map[new_y][new_x] == ROCK) {
+                    printf("Туда нельзя!\n");
+                    map.map[pl->y][pl->x] = HERO;
                 }
-                else if (map[new_y][new_x] == PORTAL) {
-                    for (int i = 0; i < height; i++) {
-                        free(map[i]);
+                else if (map.map[new_y][new_x] == PORTAL) {
+                    for (int i = 0; i < map.height; i++) {
+                        free(map.map[i]);
                     }
-                    free(map);
-                    map = generate_map(&height, &width, &hero_x, &hero_y);
+                    free(map.map);
+                    map.floor++;
+                    pl->gold += 10 * map.floor;
+                    world.hour += 1; 
+                    if (world.hour >= 24) {
+                        world.day++;
+                        world.hour %= 24;
+                    }
+                    pl->stamina -= 5;
+
+                    generate_map(&map, pl);
                     wrap_count = 0;
                     portal_spawned = 0;
                     continue;
                 }
                 else {
-                     map[hero_y][hero_x] = EMPTY;
-                     hero_x = new_x;
-                     hero_y = new_y;
-                     map[hero_y][hero_x] = HERO;
+                    map.map[pl->y][pl->x] = EMPTY;
+                    pl->x = new_x;
+                    pl->y = new_y;
+                    map.map[pl->y][pl->x] = HERO;
+                }
+                pl->stamina -= 1;
+                if (pl->stamina <= 0 || (world.hour >= 2 && world.hour < 8)) {
+                    printf("Вы пали без сил! Эвакуация...\n");
+                    pl->gold /= 2;
+                    break;
                 }
             }
-         
-            for (int i = 0; i < height; i++) {
-                free(map[i]);
-            }
-            free(map);
             break;
         default:
             printf("Неверный ввод\n");
+
         }
-    } 
-    while (choice != 0);
-    return 0;
+    }
+        while (choice != 0);
+        return 0;
 }
+    
