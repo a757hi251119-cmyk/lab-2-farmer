@@ -29,6 +29,7 @@ int main() {
         printf("[10] Записать в дневник\n");
         printf("[11] Анализатор логов\n");
         printf("[12] Навстречу приключениям!\n");
+        printf("[13] Лечь спать\n");
         printf("Выбор: ");
         while (scanf("%d", &choice) != 1) {
             printf("Ошибка! Введите число: ");
@@ -48,6 +49,7 @@ int main() {
             show_time(&world);
             break;
         case 4:
+            if (!check_player(pl)) break;
             change_time(&world);
             break;
         case 5:
@@ -72,11 +74,7 @@ int main() {
             process_logs();
             break;
         case 12:
-            if (pl == NULL) {
-                printf("Сначала создайте персонажа!\n");
-                break;
-            }
-
+            if (!check_player(pl)) break;
             struct Map map;
             map.floor = 1;
             generate_map(&map, pl);
@@ -153,6 +151,13 @@ int main() {
                     if (pl->active_relic == 2) stamina_cost_floor = 1; // Сапоги-скороходы
                     pl->stamina -= stamina_cost_floor;
 
+                    if (pl->stamina <= 0) {
+                        printf("Вы пали без сил! Эвакуация...\n");
+                        pl->gold /= 2;
+                        free_map(&map);
+                        break;
+                    }
+
                     if (rand() % 100 < 20) { 
                         int new_relic = rand() % 3 + 1;
                         printf("Вы нашли реликвию! Надеть (1) или продать за 25 золота (2)? ");
@@ -168,7 +173,7 @@ int main() {
                     generate_map(&map, pl);
                     wrap_count = 0;
                     portal_spawned = 0;
-                    continue;
+                    
                 }
                 else {
                     map.map[pl->y][pl->x] = EMPTY;
@@ -192,6 +197,14 @@ int main() {
                     break;
                 }
             }
+            break;
+        case 13:
+            if (!check_player(pl)) break;
+            world.day++;
+            world.hour = 8;
+            pl->hp = pl->max_hp;
+            pl->stamina = pl->max_stamina;
+            printf("Вы выспались! День %d, 08:00\n", world.day);
             break;
         default:
             printf("Неверный ввод\n");
